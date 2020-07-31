@@ -2,7 +2,16 @@
 #include <fstream>
 #include <cstring>
 #include <vector>
+#include <map>
+#include <utility>
 
+
+struct state {
+  int number;
+  std::vector<std::string> rules;
+}state;
+std::vector<struct state> states;
+std::map<std::pair<struct state,char> ,struct state> table_goto;
 std::vector<char> terminal;
 std::vector<char> noterminal;
 std::vector<std::string> rules;
@@ -76,6 +85,15 @@ void showRules() {
       std::cout << rules.at(i) << std::endl;
   }
 }
+bool isTerminal(char element) {
+  for(int i=0;i<terminal.size();i++) {
+      if(terminal.at(i) == element) {
+        return true;
+      }
+  }
+  return false;
+}
+bool sameState() {return true;}
 int main() {
   file.open("grammar");
 
@@ -99,5 +117,9 @@ int main() {
   }
   std::cout << "[INFO] : Rules" << std::endl;
   showRules();
+
+  struct state i {
+  .number = (int)states.size(),
+  .rules = rules,};
 
 }
