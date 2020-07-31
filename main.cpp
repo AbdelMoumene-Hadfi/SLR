@@ -80,7 +80,7 @@ int getRules() {
   }
   return 0;
 }
-void showRules() {
+void showRules(std::vector<std::string> rules) {
   for(int i=0;i<rules.size();i++) {
       std::cout << rules.at(i) << std::endl;
   }
@@ -94,6 +94,14 @@ bool isTerminal(char element) {
   return false;
 }
 bool sameState() {return true;}
+void putDot(struct state& st) {
+  std::string rule;
+  std::string dot(".");
+  for(int i=0;i<st.rules.size();i++) {
+    rule = st.rules.at(i).substr(0,3)+dot+st.rules.at(i).substr(3);
+    st.rules.at(i)=rule;
+  }
+}
 int main() {
   file.open("grammar");
 
@@ -116,10 +124,16 @@ int main() {
     std::cout << "[ERROR] : unable to get Rules" << std::endl;
   }
   std::cout << "[INFO] : Rules" << std::endl;
-  showRules();
+  showRules(rules);
 
   struct state i {
   .number = (int)states.size(),
   .rules = rules,};
+
+  std::cout << "[INFO] : Adding '.' to Rules .." << std::endl;
+  putDot(i);
+  std::cout << "[INFO] : Rules" << std::endl;
+  showRules(i.rules);
+
 
 }
