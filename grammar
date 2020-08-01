@@ -1,4 +1,5 @@
 a e b
-S A
+S A B
 S->Aa
 A->bB|e|S
+B->A
