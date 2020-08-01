@@ -109,6 +109,7 @@ struct state {
   std::vector<std::string> rules;
 }state;
 std::vector<struct state> states;
+std::vector<int> statesNotProcessed;
 std::map<std::pair<struct state,char> ,struct state> table_goto;
 void showRules(std::vector<std::string> rules) {
   for(int i=0;i<rules.size();i++) {
@@ -271,19 +272,33 @@ void processState(struct state& st,const char c,const struct state stSource) {
   ret_add = addState(st);
   if(ret_add == -1) {
     if(st.number == 0) {
-      std::cout << st.number << " state" << std::endl;
+      std::cout << "[INFO] : "<< st.number << " state" << std::endl;
       showRules(st.rules);
       gotoRules(st);
     }
     else {
+      statesNotProcessed.push_back(st.number);
       std::cout << "[INFO] :  FROM " << stSource.number << " state WITH " << c << " GOTO " <<  st.number << " state" << std::endl;
       showRules(st.rules);
-      gotoRules(st);
     }
   }
   else {
         std::cout << "[INFO] :  FROM " << stSource.number << " state WITH " << c << " GOTO " <<  ret_add << " state" << std::endl;
   }
+}
+struct state getStateNumber(const int number) {
+  int i;
+  for(i=0;i<states.size();i++) {
+    if(states.at(i).number == number) {
+      break;
+    }
+  }
+  return states.at(i);
+}
+void generateState() {
+  struct state st = getStateNumber(statesNotProcessed.at(0));
+  gotoRules(st);
+  statesNotProcessed.erase(statesNotProcessed.begin());
 }
 int main() {
   Mygrammer.file.open("grammar0");
@@ -322,4 +337,7 @@ int main() {
 
   struct state i = generateFirstState();
   processState(i,'\0',i);
+  while(statesNotProcessed.size()!=0) {
+    generateState();
+  }
 }
