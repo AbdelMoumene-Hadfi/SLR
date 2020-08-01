@@ -110,7 +110,7 @@ struct state {
 }state;
 std::vector<struct state> states;
 std::vector<int> statesNotProcessed;
-std::map<std::pair<struct state,char> ,struct state> table_goto;
+std::map<std::pair<int,char> ,int> table_goto;
 void showRules(std::vector<std::string> rules) {
   for(int i=0;i<rules.size();i++) {
       std::cout << rules.at(i) << std::endl;
@@ -267,26 +267,29 @@ void gotoRules(const struct state st) {
   }
 }
 void processState(struct state& st,const char c,const struct state stSource) {
+  std::pair<int,char> key(stSource.number,c);
   int ret_add;
   extendRules(st);
   ret_add = addState(st);
   if(ret_add == -1) {
     if(st.number == 0) {
-      std::cout << "[INFO] : "<< st.number << " state" << std::endl;
+      std::cout << "[INFO] : I"<< st.number << " state" << std::endl;
       showRules(st.rules);
       gotoRules(st);
     }
     else {
+      table_goto.insert(std::pair<std::pair<int,char> ,int>(key,st.number));
       statesNotProcessed.push_back(st.number);
-      std::cout << "[INFO] :  FROM " << stSource.number << " state WITH " << c << " GOTO " <<  st.number << " state" << std::endl;
+      std::cout << "[INFO] :  FROM I" << stSource.number << " state WITH " << c << " GOTO I" <<  st.number << " state" << std::endl;
       showRules(st.rules);
     }
   }
   else {
-        std::cout << "[INFO] :  FROM " << stSource.number << " state WITH " << c << " GOTO " <<  ret_add << " state" << std::endl;
+      table_goto.insert(std::pair<std::pair<int,char> ,int>(key,ret_add));
+      std::cout << "[INFO] :  FROM I" << stSource.number << " state WITH " << c << " GOTO I" <<  ret_add << " state" << std::endl;
   }
 }
-struct state getStateNumber(const int number) {
+struct state getStateByNumber(const int number) {
   int i;
   for(i=0;i<states.size();i++) {
     if(states.at(i).number == number) {
@@ -296,12 +299,17 @@ struct state getStateNumber(const int number) {
   return states.at(i);
 }
 void generateState() {
-  struct state st = getStateNumber(statesNotProcessed.at(0));
+  struct state st = getStateByNumber(statesNotProcessed.at(0));
   gotoRules(st);
   statesNotProcessed.erase(statesNotProcessed.begin());
 }
+void showGoto() {
+  std::cout << "GOTO TABLE : " << std::endl;
+  for (auto it=table_goto.begin(); it!=table_goto.end(); ++it)
+    std::cout << "FROM I"<< it->first.first << " WITH " << it->first.second << " GOTO I" << it->second << std::endl;
+}
 int main() {
-  Mygrammer.file.open("grammar0");
+  Mygrammer.file.open("grammar");
 
   std::cout << "[INFO] : getting axiom .." << std::endl;
   if(Mygrammer.getAxiom() == -1) {
@@ -340,4 +348,6 @@ int main() {
   while(statesNotProcessed.size()!=0) {
     generateState();
   }
+
+  showGoto();
 }

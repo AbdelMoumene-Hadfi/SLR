@@ -1,8 +1,9 @@
 E
-a b +
-E T B
-E->E+Ta
++ * ( ) i
+E T F
+E->E+T
 E->T
-T->b
-T->B
-B->a
+T->T*F
+T->F
+F->(E)
+F->i
