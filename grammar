@@ -1,5 +1,6 @@
+E
 a e b
 S A B
-S->Aa
-A->bB|e|S
+E->Aa
+A->bB|e|E
 B->A

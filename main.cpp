@@ -7,6 +7,7 @@
 
 struct grammar {
   std::ifstream file;
+  char axiom;
   std::vector<char> terminal;
   std::vector<char> noterminal;
   std::vector<std::string> rules;
@@ -72,6 +73,15 @@ struct grammar {
       }
       std::getline(file,line);
     }
+    return 0;
+  }
+  int getAxiom() {
+    std::string line;
+    std::getline(file,line);
+    if(line.length()==0) {
+      return -1;
+    }
+    axiom = line[0];
     return 0;
   }
   bool isTerminal(char element) {
@@ -168,9 +178,25 @@ void gotoRules(const struct state st) {
   }
 
 }
-void generateFirstState() {}
+struct state generateFirstState() {
+  std::vector<std::string> rules;
+  std::string rule("S->");
+  rule.push_back(Mygrammer.axiom);
+  rules.push_back(rule);
+  struct state i {
+    .number = (int)states.size(),
+    .rules = rules,};
+  return i;
+}
 int main() {
   Mygrammer.file.open("grammar");
+
+  std::cout << "[INFO] : getting axiom .." << std::endl;
+  if(Mygrammer.getAxiom() == -1) {
+    std::cout << "[ERROR] : unable to get axiom" << std::endl;
+  }
+  std::cout << "[INFO] : axiom " << std::endl;
+  std::cout << Mygrammer.axiom << std::endl;
 
   std::cout << "[INFO] : getting terminal symbol .." << std::endl;
   if(Mygrammer.getTerminal() == -1) {
@@ -193,22 +219,23 @@ int main() {
   std::cout << "[INFO] : Rules" << std::endl;
   showRules(Mygrammer.rules);
 
-  struct state i {
-  .number = (int)states.size(),
-  .rules = Mygrammer.rules,};
+  struct state i = generateFirstState();
+  std::cout << "[INFO] : First State rules" << std::endl;
+  showRules(i.rules);
 
-  int ret ;
   std::cout << "[INFO] : Adding '.' to Rules .." << std::endl;
   putDot(i);
   std::cout << "[INFO] : Rules" << std::endl;
   showRules(i.rules);
   /*
+  int ret ;
   std::cout << "[INFO] : Move Dot" << std::endl;
   ret=moveDot(i.rules.at(0));
   std::cout << ret << std::endl;
-  */
-  gotoRules(i);
 
+
+  gotoRules(i);
+  */
 
 
 }
