@@ -92,6 +92,15 @@ struct grammar {
     }
     return false;
   }
+  std::vector<std::string>  getRulesStart(char element) {
+    std::vector<std::string> rulesFrom;
+    for(int i=0;i<rules.size();i++) {
+      if(rules.at(i)[0]==element) {
+        rulesFrom.push_back(rules.at(i));
+      }
+    }
+    return rulesFrom;
+  }
 }grammar;
 struct grammar Mygrammer;
 struct state {
@@ -106,12 +115,12 @@ void showRules(std::vector<std::string> rules) {
   }
 }
 bool sameState() {return true;}
-void putDot(struct state& st) {
+void putDot(std::vector<std::string>& rules) {
   std::string rule;
   std::string dot(".");
-  for(int i=0;i<st.rules.size();i++) {
-    rule = st.rules.at(i).substr(0,3)+dot+st.rules.at(i).substr(3);
-    st.rules.at(i)=rule;
+  for(int i=0;i<rules.size();i++) {
+    rule = rules.at(i).substr(0,3)+dot+rules.at(i).substr(3);
+    rules.at(i)=rule;
   }
 }
 int moveDot(std::string& rule) {
@@ -168,25 +177,57 @@ std::vector<std::string>  getrules(const struct state st,char element) {
   }
   return rules;
 }
+bool ruleExist(const std::vector<std::string> rules,const std::string rule) {
+  bool exist = false ;
+  for(int i=0;i<rules.size();i++) {
+    if(rule.compare(rules.at(i)) == 0) {
+      exist = true ;
+      break;
+    }
+  }
+  return exist;
+}
 void gotoRules(const struct state st) {
-  std::vector<char> Charlist = getElementToRead(st);
+  std::vector<char> CharToRead = getElementToRead(st);
   std::vector<std::string> rules2;
-  for(int i=0;i<Charlist.size();i++) {
-    rules2 = getrules(st,Charlist.at(i));
-    std::cout << "[INFO] : Rules after " << Charlist.at(i) << std::endl;
+  for(int i=0;i<CharToRead.size();i++) {
+    rules2 = getrules(st,CharToRead.at(i));
+    std::cout << "[INFO] : Rules after " << CharToRead.at(i) << std::endl;
     showRules(rules2);
   }
-
+}
+void extendRules(struct state& st) {
+  bool recall = false;
+  std::vector<std::string> rules;
+  std::string rule;
+  std::vector<char> CharToRead = getElementToRead(st);
+  for(int i=0;i<CharToRead.size();i++) {
+    rules = Mygrammer.getRulesStart(CharToRead.at(i));
+    for(int j=0;j<rules.size();j++) {
+      rule = rules.at(j);
+      if(!ruleExist(st.rules,rule)) {
+        if(!Mygrammer.isTerminal(rule[0])) {
+          recall = true ;
+        }
+        st.rules.push_back(rule) ;
+      }
+    }
+  }
+  if(recall) {
+      extendRules(st);
+  }
 }
 struct state generateFirstState() {
   std::vector<std::string> rules;
   std::string rule("S->");
   rule.push_back(Mygrammer.axiom);
   rules.push_back(rule);
-  struct state i {
+  struct state st {
     .number = (int)states.size(),
     .rules = rules,};
-  return i;
+  putDot(st.rules);
+  extendRules(st);
+  return st;
 }
 int main() {
   Mygrammer.file.open("grammar");
@@ -216,17 +257,17 @@ int main() {
   if(Mygrammer.getRules() == -1) {
     std::cout << "[ERROR] : unable to get Rules" << std::endl;
   }
-  std::cout << "[INFO] : Rules" << std::endl;
+  std::cout << "[INFO] : Grammar Rules" << std::endl;
+  showRules(Mygrammer.rules);
+  std::cout << "[INFO] : Adding '.' to Grammar Rules .." << std::endl;
+  putDot(Mygrammer.rules);
+  std::cout << "[INFO] : Grammar Rules" << std::endl;
   showRules(Mygrammer.rules);
 
   struct state i = generateFirstState();
   std::cout << "[INFO] : First State rules" << std::endl;
   showRules(i.rules);
-
-  std::cout << "[INFO] : Adding '.' to Rules .." << std::endl;
-  putDot(i);
-  std::cout << "[INFO] : Rules" << std::endl;
-  showRules(i.rules);
+  gotoRules(i);
   /*
   int ret ;
   std::cout << "[INFO] : Move Dot" << std::endl;
@@ -234,7 +275,7 @@ int main() {
   std::cout << ret << std::endl;
 
 
-  gotoRules(i);
+
   */
 
 
