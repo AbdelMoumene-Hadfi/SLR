@@ -1,6 +1,8 @@
 E
-a e b
-S A B
-E->Aa
-A->bB|e|E
-B->A
+a b +
+E T B
+E->E+Ta
+E->T
+T->b
+T->B
+B->a

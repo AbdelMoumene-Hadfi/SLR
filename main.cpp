@@ -5,6 +5,7 @@
 #include <map>
 #include <utility>
 
+void processState(struct state& st,const char c,const struct state stSource);
 struct grammar {
   std::ifstream file;
   char axiom;
@@ -114,7 +115,30 @@ void showRules(std::vector<std::string> rules) {
       std::cout << rules.at(i) << std::endl;
   }
 }
-bool sameState() {return true;}
+bool sameState(const struct state st,const struct state st2) {
+  bool same = true;
+  if(st.rules.size() != st2.rules.size()) {
+    same = false ;
+  }
+  else {
+    for(int i=0;i<st.rules.size();i++) {
+      if(st.rules.at(i).compare(st2.rules.at(i)) != 0) {
+          same = false;
+          break;
+      }
+    }
+  }
+  return same;
+}
+int addState(const struct state st) {
+  for(int i=0;i<states.size();i++) {
+    if(sameState(st,states.at(i))) {
+      return states.at(i).number;
+    }
+  }
+  states.push_back(st);
+  return -1;
+}
 void putDot(std::vector<std::string>& rules) {
   std::string rule;
   std::string dot(".");
@@ -152,7 +176,12 @@ std::vector<char> getElementToRead(const struct state st) {
   char afterDot;
   bool insert = true;
   for(int i=0;i<st.rules.size();i++) {
+    insert = true;
     afterDot = getElementAfterDot(st.rules.at(i));
+
+    if(afterDot=='\0') {
+      continue;
+    }
     for(int j=0;j<ArrayElement.size();j++) {
       if(ArrayElement.at(j) == afterDot) {
         insert = false;
@@ -164,7 +193,6 @@ std::vector<char> getElementToRead(const struct state st) {
     }
   }
   return ArrayElement;
-
 }
 std::vector<std::string>  getrules(const struct state st,char element) {
   std::vector<std::string> rules;
@@ -186,15 +214,6 @@ bool ruleExist(const std::vector<std::string> rules,const std::string rule) {
     }
   }
   return exist;
-}
-void gotoRules(const struct state st) {
-  std::vector<char> CharToRead = getElementToRead(st);
-  std::vector<std::string> rules2;
-  for(int i=0;i<CharToRead.size();i++) {
-    rules2 = getrules(st,CharToRead.at(i));
-    std::cout << "[INFO] : Rules after " << CharToRead.at(i) << std::endl;
-    showRules(rules2);
-  }
 }
 void extendRules(struct state& st) {
   bool recall = false;
@@ -226,11 +245,48 @@ struct state generateFirstState() {
     .number = (int)states.size(),
     .rules = rules,};
   putDot(st.rules);
-  extendRules(st);
   return st;
 }
+void gotoRules(const struct state st) {
+  std::vector<char> CharToRead = getElementToRead(st);
+  std::vector<std::string> rules2;
+  struct state stGenerated;
+  int ret ;
+  for(int i=0;i<CharToRead.size();i++) {
+    rules2 = getrules(st,CharToRead.at(i));
+    for(int j=0;j<rules2.size();j++) {
+      ret=moveDot(rules2.at(j));
+      if(ret == -1 || ret == -2) {
+        std::cout << "[ERROR] : Unable to move dot " << CharToRead.at(i) << std::endl;
+      }
+    }
+    stGenerated.number = states.size();
+    stGenerated.rules = rules2 ;
+    processState(stGenerated,CharToRead.at(i),st);
+  }
+}
+void processState(struct state& st,const char c,const struct state stSource) {
+  int ret_add;
+  extendRules(st);
+  ret_add = addState(st);
+  if(ret_add == -1) {
+    if(st.number == 0) {
+      std::cout << st.number << " state" << std::endl;
+      showRules(st.rules);
+      gotoRules(st);
+    }
+    else {
+      std::cout << "[INFO] :  FROM " << stSource.number << " state WITH " << c << " GOTO " <<  st.number << " state" << std::endl;
+      showRules(st.rules);
+      gotoRules(st);
+    }
+  }
+  else {
+        std::cout << "[INFO] :  FROM " << stSource.number << " state WITH " << c << " GOTO " <<  ret_add << " state" << std::endl;
+  }
+}
 int main() {
-  Mygrammer.file.open("grammar");
+  Mygrammer.file.open("grammar0");
 
   std::cout << "[INFO] : getting axiom .." << std::endl;
   if(Mygrammer.getAxiom() == -1) {
@@ -265,18 +321,5 @@ int main() {
   showRules(Mygrammer.rules);
 
   struct state i = generateFirstState();
-  std::cout << "[INFO] : First State rules" << std::endl;
-  showRules(i.rules);
-  gotoRules(i);
-  /*
-  int ret ;
-  std::cout << "[INFO] : Move Dot" << std::endl;
-  ret=moveDot(i.rules.at(0));
-  std::cout << ret << std::endl;
-
-
-
-  */
-
-
+  processState(i,'\0',i);
 }
