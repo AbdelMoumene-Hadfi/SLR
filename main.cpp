@@ -12,19 +12,24 @@ struct grammar {
   std::vector<char> terminal;
   std::vector<char> noterminal;
   std::vector<std::string> rules;
+  std::map<char,std::string> first;
+  std::map<char,std::string> follow;
   void showTerminal() {
+    std::cout << "[INFO] : Terminal Symbol" << std::endl;
     for(int i=0;i<terminal.size();i++) {
         std::cout << terminal.at(i) << " ";
     }
     std::cout << std::endl;
   }
   void showNoterminal() {
+    std::cout << "[INFO] : No-Terminal Symbol" << std::endl;
     for(int i=0;i<noterminal.size();i++) {
         std::cout << noterminal.at(i) << " ";
     }
     std::cout <<  std::endl;
   }
-  int getTerminal() {
+  int readTerminal() {
+    std::cout << "[INFO] : Read Terminal Symbol .." << std::endl;
     std::string line;
     std::getline(file,line);
     if(line.length()==0) {
@@ -38,7 +43,8 @@ struct grammar {
     }
     return 0;
   }
-  int getNoterminal() {
+  int readNoTerminal() {
+    std::cout << "[INFO] : Read No-Terminal Symbol .." << std::endl;
     std::string line;
     std::getline(file,line);
     if(line.length()==0) {
@@ -52,7 +58,8 @@ struct grammar {
     }
     return 0;
   }
-  int getRules() {
+  int readRules() {
+    std::cout << "[INFO] : Reading Rules .." << std::endl;
     std::string line;
     std::getline(file,line);
     if(line.length()==0) {
@@ -77,6 +84,7 @@ struct grammar {
     return 0;
   }
   int getAxiom() {
+    std::cout << "[INFO] : Read axiom .." << std::endl;
     std::string line;
     std::getline(file,line);
     if(line.length()==0) {
@@ -102,6 +110,11 @@ struct grammar {
     }
     return rulesFrom;
   }
+  void showFirst() {
+    std::cout << "[INFO] First Table  " << std::endl;
+    for (auto it=first.begin(); it!=first.end(); ++it)
+      std::cout <<  it->first << " : " << it->second << std::endl;
+  }
 }grammar;
 struct grammar Mygrammer;
 struct state {
@@ -110,7 +123,30 @@ struct state {
 }state;
 std::vector<struct state> states;
 std::vector<int> statesNotProcessed;
-std::map<std::pair<int,char> ,int> table_goto;
+std::map<std::pair<int,char> ,int> automate;
+std::map<std::pair<int,char> ,std::string> action;
+std::string generateFirst(const char c) {
+  std::map<char,std::string>::iterator retFind = Mygrammer.first.find(c);
+  if(retFind != Mygrammer.first.end() ) {
+    return retFind->second;
+  }
+  else {
+    std::string First;
+    std::vector<std::string> rulesStart = Mygrammer.getRulesStart(c);
+    std::string rule;
+    for(int i=0;i<rulesStart.size();i++) {
+      rule = rulesStart.at(i).substr(3);
+      if(Mygrammer.isTerminal(rule[0])) {
+        First.push_back(rule[0]);
+      }
+      else if(rule[0] != c) {
+        First += generateFirst(rule[0]);
+      }
+    }
+    Mygrammer.first.insert(std::pair<char,std::string>(c,First));
+    return First;
+  }
+}
 void showRules(std::vector<std::string> rules) {
   for(int i=0;i<rules.size();i++) {
       std::cout << rules.at(i) << std::endl;
@@ -278,14 +314,14 @@ void processState(struct state& st,const char c,const struct state stSource) {
       gotoRules(st);
     }
     else {
-      table_goto.insert(std::pair<std::pair<int,char> ,int>(key,st.number));
+      automate.insert(std::pair<std::pair<int,char> ,int>(key,st.number));
       statesNotProcessed.push_back(st.number);
       std::cout << "[INFO] :  FROM I" << stSource.number << " state WITH " << c << " GOTO I" <<  st.number << " state" << std::endl;
       showRules(st.rules);
     }
   }
   else {
-      table_goto.insert(std::pair<std::pair<int,char> ,int>(key,ret_add));
+      automate.insert(std::pair<std::pair<int,char> ,int>(key,ret_add));
       std::cout << "[INFO] :  FROM I" << stSource.number << " state WITH " << c << " GOTO I" <<  ret_add << " state" << std::endl;
   }
 }
@@ -303,51 +339,66 @@ void generateState() {
   gotoRules(st);
   statesNotProcessed.erase(statesNotProcessed.begin());
 }
-void showGoto() {
-  std::cout << "GOTO TABLE : " << std::endl;
-  for (auto it=table_goto.begin(); it!=table_goto.end(); ++it)
+void showAutomate() {
+  std::cout << "Grammar Automate : " << std::endl;
+  for (auto it=automate.begin(); it!=automate.end(); ++it)
     std::cout << "FROM I"<< it->first.first << " WITH " << it->first.second << " GOTO I" << it->second << std::endl;
+}
+void generateAction() {
+  std::vector<char> CharToRead;
+  for(int i=0;i<states.size();i++) {
+    CharToRead = getElementToRead(states.at(i));
+    for(int j=0;j<CharToRead.size();j++) {
+      if(Mygrammer.isTerminal(CharToRead.at(j))) {
+        std::cout << states.at(i).number << " : " << CharToRead.at(j) << " -> S "<< automate.at(std::pair<int,char>(states.at(i).number,CharToRead.at(j))) << std::endl;
+      }
+    }
+  }
 }
 int main() {
   Mygrammer.file.open("grammar");
 
-  std::cout << "[INFO] : getting axiom .." << std::endl;
   if(Mygrammer.getAxiom() == -1) {
     std::cout << "[ERROR] : unable to get axiom" << std::endl;
   }
-  std::cout << "[INFO] : axiom " << std::endl;
-  std::cout << Mygrammer.axiom << std::endl;
+  std::cout << "[INFO] : Axiom " << std::endl;
+  //std::cout << Mygrammer.axiom << std::endl;
 
-  std::cout << "[INFO] : getting terminal symbol .." << std::endl;
-  if(Mygrammer.getTerminal() == -1) {
+  if(Mygrammer.readTerminal() == -1) {
     std::cout << "[ERROR] : unable to get terminal" << std::endl;
   }
-  std::cout << "[INFO] : terminal symbol" << std::endl;
-  Mygrammer.showTerminal();
+  //Mygrammer.showTerminal();
 
-  std::cout << "[INFO] : getting no-terminal symbol .." << std::endl;
-  if(Mygrammer.getNoterminal() == -1) {
+  if(Mygrammer.readNoTerminal() == -1) {
     std::cout << "[ERROR] : unable to get no-terminal" << std::endl;
   }
-  std::cout << "[INFO] : noterminal symbol" << std::endl;
-  Mygrammer.showNoterminal();
+  //Mygrammer.showNoterminal();
 
-  std::cout << "[INFO] : getting Rules .." << std::endl;
-  if(Mygrammer.getRules() == -1) {
+  if(Mygrammer.readRules() == -1) {
     std::cout << "[ERROR] : unable to get Rules" << std::endl;
   }
   std::cout << "[INFO] : Grammar Rules" << std::endl;
-  showRules(Mygrammer.rules);
+  //showRules(Mygrammer.rules);
+
+  generateFirst(Mygrammer.axiom);
+  Mygrammer.showFirst();
+
   std::cout << "[INFO] : Adding '.' to Grammar Rules .." << std::endl;
   putDot(Mygrammer.rules);
   std::cout << "[INFO] : Grammar Rules" << std::endl;
   showRules(Mygrammer.rules);
-
+  /*
   struct state i = generateFirstState();
   processState(i,'\0',i);
   while(statesNotProcessed.size()!=0) {
     generateState();
   }
 
-  showGoto();
+  showAutomate();
+
+  generateAction();
+  */
+
+
+
 }
