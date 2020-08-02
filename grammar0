@@ -1,9 +1,12 @@
-E
-+ * ( ) e
-E T F
-E->E+T
-E->T
-T->T*F
-T->F
-F->(E)
-F->e
+A
+a b c d
+A E T C
+A->ETC
+E->aE
+E->@
+T->bT
+T->cT
+T->@
+C->dC
+C->da
+C->dE

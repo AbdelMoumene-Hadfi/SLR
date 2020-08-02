@@ -131,16 +131,29 @@ std::string generateFirst(const char c) {
     return retFind->second;
   }
   else {
-    std::string First;
+    std::string First,RetFirst;
     std::vector<std::string> rulesStart = Mygrammer.getRulesStart(c);
     std::string rule;
+    int index_epsilon=0;
     for(int i=0;i<rulesStart.size();i++) {
       rule = rulesStart.at(i).substr(3);
-      if(Mygrammer.isTerminal(rule[0])) {
-        First.push_back(rule[0]);
+      if(Mygrammer.isTerminal(rule[0]) || rule[0]=='@') {
+        if(First.find(rule[0])==std::string::npos) {
+          First.push_back(rule[0]);
+        }
       }
       else if(rule[0] != c) {
-        First += generateFirst(rule[0]);
+        do {
+          if(index_epsilon == rule.length()) {
+            break;
+          }
+          if(First.find("@")!=std::string::npos) {
+            First.erase(First.find("@"));
+          }
+          RetFirst=generateFirst(rule[index_epsilon]);
+          index_epsilon++;
+          First += RetFirst;
+        }while((RetFirst.find("@"))!=std::string::npos);
       }
     }
     Mygrammer.first.insert(std::pair<char,std::string>(c,First));
@@ -356,7 +369,7 @@ void generateAction() {
   }
 }
 int main() {
-  Mygrammer.file.open("grammar");
+  Mygrammer.file.open("grammar0");
 
   if(Mygrammer.getAxiom() == -1) {
     std::cout << "[ERROR] : unable to get axiom" << std::endl;
