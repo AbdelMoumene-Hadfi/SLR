@@ -452,15 +452,18 @@ void showAutomate() {
 }
 void generateAction() {
   std::vector<char> CharToRead;
-  std::string rule,Follow;
+  std::string rule,Follow,shift("S"),reduce("R");
   int rule_number;
+
 
   for(int i=0;i<states.size();i++) {
     //
     CharToRead = getElementToRead(states.at(i));
     for(int j=0;j<CharToRead.size();j++) {
       if(Mygrammer.isTerminal(CharToRead.at(j))) {
-        std::cout << states.at(i).number << " : " << CharToRead.at(j) << " -> S "<< automate.at(std::pair<int,char>(states.at(i).number,CharToRead.at(j))) << std::endl;
+        shift.append(std::to_string(automate.at(std::pair<int,char>(states.at(i).number,CharToRead.at(j)))));
+        action.insert(std::pair<std::pair<int,char> ,std::string>(std::pair<int,char>(states.at(i).number,CharToRead.at(j)),shift));
+        shift.erase(shift.begin()+1,shift.end());
       }
     }
     //
@@ -468,17 +471,47 @@ void generateAction() {
       rule = states.at(i).rules.at(j);
       if(rule.find(".")==(rule.length()-1)) {
         if(rule[0]=='S') {
-          std::cout << states.at(i).number << " : $ -> ACC" << std::endl;
+          action.insert(std::pair<std::pair<int,char> ,std::string>(std::pair<int,char>(states.at(i).number,'$'),"ACC"));
         }
         else {
           rule_number = Mygrammer.ruleNumber(rule);
           Follow = Mygrammer.follow.at(rule[0]);
           for(int k=0;k<Follow.length();k++) {
-            std::cout << states.at(i).number << " : " << Follow.at(k) << " -> R "<< rule_number << std::endl;
+            reduce.append(std::to_string(rule_number));
+            action.insert(std::pair<std::pair<int,char> ,std::string>(std::pair<int,char>(states.at(i).number,Follow.at(k)),reduce));
+            reduce.erase(reduce.begin()+1,reduce.end());
           }
         }
       }
     }
+  }
+}
+void showAction() {
+  std::map<std::pair<int,char> ,std::string>::iterator retFind;
+  std::cout << "Action Table: " << std::endl << "State" << "\t";
+  for(int i=0;i<Mygrammer.terminal.size();i++) {
+    std::cout << Mygrammer.terminal.at(i) << "\t";
+  }
+  std::cout << '$' << "\t" << std::endl;
+  for (int i=0;i<states.size();i++) {
+    std::cout << i << "\t";
+    for(int j=0;j<Mygrammer.terminal.size();j++) {
+      retFind = action.find(std::pair<int,char>(i,Mygrammer.terminal.at(j)));
+      if(retFind != action.end() ) {
+         std::cout << retFind->second << "\t";
+      }
+      else {
+        std::cout <<  "\t";
+      }
+    }
+    retFind = action.find(std::pair<int,char>(i,'$'));
+    if(retFind != action.end() ) {
+       std::cout << retFind->second << "\t";
+    }
+    else {
+      std::cout <<  "\t";
+    }
+    std::cout << std::endl;
   }
 }
 int main() {
@@ -527,7 +560,7 @@ int main() {
 
   generateAction();
 
-
+  showAction();
 
 
 }
