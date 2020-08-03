@@ -69,7 +69,6 @@ struct grammar {
       return -1;
     }
     while(line.length()!=0){
-      noterminal.push_back(line[0]);
       std::string rule(line.substr(0,3));
       for(int i=3;i<line.length();i++) {
         if(line[i] == '|') {
@@ -514,6 +513,27 @@ void showAction() {
     std::cout << std::endl;
   }
 }
+void showGoto() {
+  std::map<std::pair<int,char> ,int>::iterator retFind;
+  std::cout << "[INFO] : GOTO Table " << std::endl << "State" << "\t";
+  for(int i=0;i<Mygrammer.noterminal.size();i++) {
+    std::cout << Mygrammer.noterminal.at(i) << "\t";
+  }
+  std::cout << std::endl;
+  for (int i=0;i<states.size();i++) {
+    std::cout << i << "\t";
+    for(int j=0;j<Mygrammer.noterminal.size();j++) {
+      retFind = automate.find(std::pair<int,char>(i,Mygrammer.noterminal.at(j)));
+      if(retFind != automate.end() ) {
+         std::cout << retFind->second << "\t";
+      }
+      else {
+        std::cout <<  "\t";
+      }
+    }
+    std::cout << std::endl;
+  }
+}
 int main() {
   Mygrammer.file.open("grammar");
 
@@ -521,17 +541,17 @@ int main() {
     std::cout << "[ERROR] : unable to get axiom" << std::endl;
   }
   std::cout << "[INFO] : Axiom " << std::endl;
-  //std::cout << Mygrammer.axiom << std::endl;
+  std::cout << Mygrammer.axiom << std::endl;
 
   if(Mygrammer.readTerminal() == -1) {
     std::cout << "[ERROR] : unable to get terminal" << std::endl;
   }
-  //Mygrammer.showTerminal();
+  Mygrammer.showTerminal();
 
   if(Mygrammer.readNoTerminal() == -1) {
     std::cout << "[ERROR] : unable to get no-terminal" << std::endl;
   }
-  //Mygrammer.showNoterminal();
+  Mygrammer.showNoterminal();
 
   if(Mygrammer.readRules() == -1) {
     std::cout << "[ERROR] : unable to get Rules" << std::endl;
@@ -541,7 +561,6 @@ int main() {
 
   generateFirst('S');
   Mygrammer.showFirst();
-
   generateFollows();
   Mygrammer.showFollow();
 
@@ -561,6 +580,9 @@ int main() {
   generateAction();
 
   showAction();
+
+  showGoto();
+
 
 
 }
