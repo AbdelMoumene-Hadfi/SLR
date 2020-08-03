@@ -61,6 +61,9 @@ struct grammar {
   int readRules() {
     std::cout << "[INFO] : Reading Rules .." << std::endl;
     std::string line;
+    std::string firstRule("S->");
+    firstRule.push_back(axiom);
+    rules.push_back(firstRule);
     std::getline(file,line);
     if(line.length()==0) {
       return -1;
@@ -93,7 +96,7 @@ struct grammar {
     axiom = line[0];
     return 0;
   }
-  bool isTerminal(char element) {
+  bool isTerminal(const char element) {
     for(int i=0;i<terminal.size();i++) {
         if(terminal.at(i) == element) {
           return true;
@@ -101,7 +104,19 @@ struct grammar {
     }
     return false;
   }
-  std::vector<std::string>  getRulesStart(char element) {
+  int ruleNumber(std::string rule) {
+    std::string thisrule;
+    rule.erase(rule.begin()+rule.find("."));
+    for(int i=0;i<rules.size();i++) {
+      thisrule = rules.at(i);
+      thisrule.erase(thisrule.begin()+thisrule.find("."));
+      if(rule.compare(thisrule) == 0) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  std::vector<std::string>  getRulesStart(const char element) {
     std::vector<std::string> rulesFrom;
     for(int i=0;i<rules.size();i++) {
       if(rules.at(i)[0]==element) {
@@ -110,9 +125,23 @@ struct grammar {
     }
     return rulesFrom;
   }
+  std::vector<int>  getPositionSecond(const std::string rule,const char element) {
+    std::vector<int> Pos;
+    for(int i=3;i<rule.length();i++) {
+      if(rule[i]==element) {
+        Pos.push_back(i);
+      }
+    }
+    return Pos;
+  }
   void showFirst() {
     std::cout << "[INFO] First Table  " << std::endl;
     for (auto it=first.begin(); it!=first.end(); ++it)
+      std::cout <<  it->first << " : " << it->second << std::endl;
+  }
+  void showFollow() {
+    std::cout << "[INFO] Follow Table  " << std::endl;
+    for (auto it=follow.begin(); it!=follow.end(); ++it)
       std::cout <<  it->first << " : " << it->second << std::endl;
   }
 }grammar;
@@ -148,7 +177,7 @@ std::string generateFirst(const char c) {
             break;
           }
           if(First.find("@")!=std::string::npos) {
-            First.erase(First.find("@"));
+            First.erase(First.begin()+First.find("@"));
           }
           RetFirst=generateFirst(rule[index_epsilon]);
           index_epsilon++;
@@ -158,6 +187,70 @@ std::string generateFirst(const char c) {
     }
     Mygrammer.first.insert(std::pair<char,std::string>(c,First));
     return First;
+  }
+}
+std::string generateFollow(const char c) {
+  std::map<char,std::string>::iterator retFind = Mygrammer.follow.find(c);
+  if(retFind != Mygrammer.follow.end() ) {
+    return retFind->second;
+  }
+  else {
+    std::string Follow,RetFollow;
+    std::vector<int> pos;
+    int index;
+    for(int i=0;i<Mygrammer.rules.size();i++) {
+      pos=Mygrammer.getPositionSecond(Mygrammer.rules.at(i),c);
+      for(int j=0;j<pos.size();j++) {
+        if(pos.at(j)==Mygrammer.rules.at(i).length()-1) {
+          if(Mygrammer.rules.at(i)[0]!=c) {
+            RetFollow=generateFollow(Mygrammer.rules.at(i)[0]);
+            for(int k=0;k<RetFollow.size();k++) {
+              if(Follow.find(RetFollow.at(k))==std::string::npos) {
+                Follow.push_back(RetFollow.at(k));
+              }
+            }
+          }
+        }
+        else {
+          index = pos.at(j)+1;
+          do {
+            if(Mygrammer.isTerminal(Mygrammer.rules.at(i)[index])) {
+              if(Follow.find(Mygrammer.rules.at(i)[index])==std::string::npos) {
+                  Follow.push_back(Mygrammer.rules.at(i)[index]);
+              }
+              break;
+            }
+            else {
+              RetFollow = generateFirst(Mygrammer.rules.at(i)[index]);
+              for(int k=0;k<RetFollow.size();k++) {
+                if(Follow.find(RetFollow.at(k))==std::string::npos) {
+                  Follow.push_back(RetFollow.at(k));
+                }
+              }
+              index++;
+            }
+          }while((RetFollow.find("@"))!=std::string::npos && index<Mygrammer.rules.at(i).length());
+          if(index>Mygrammer.rules.at(i).length()) {
+            if((RetFollow.find("@"))!=std::string::npos) {
+              RetFollow=generateFollow(Mygrammer.rules.at(i)[0]);
+              for(int k=0;k<RetFollow.size();k++) {
+                if(Follow.find(RetFollow.at(k))==std::string::npos) {
+                  Follow.push_back(RetFollow.at(k));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    Mygrammer.follow.insert(std::pair<char,std::string>(c,Follow));
+    return Follow;
+  }
+}
+void generateFollows() {
+  Mygrammer.follow.insert(std::pair<char,std::string>('S',"$"));
+  for(int i=0;i<Mygrammer.noterminal.size();i++) {
+    generateFollow(Mygrammer.noterminal.at(i));
   }
 }
 void showRules(std::vector<std::string> rules) {
@@ -288,13 +381,10 @@ void extendRules(struct state& st) {
 }
 struct state generateFirstState() {
   std::vector<std::string> rules;
-  std::string rule("S->");
-  rule.push_back(Mygrammer.axiom);
-  rules.push_back(rule);
+  rules.push_back(Mygrammer.rules.at(0));
   struct state st {
     .number = (int)states.size(),
     .rules = rules,};
-  putDot(st.rules);
   return st;
 }
 void gotoRules(const struct state st) {
@@ -303,6 +393,9 @@ void gotoRules(const struct state st) {
   struct state stGenerated;
   int ret ;
   for(int i=0;i<CharToRead.size();i++) {
+    if(CharToRead.at(i)=='@') {
+      continue;
+    }
     rules2 = getrules(st,CharToRead.at(i));
     for(int j=0;j<rules2.size();j++) {
       ret=moveDot(rules2.at(j));
@@ -359,17 +452,37 @@ void showAutomate() {
 }
 void generateAction() {
   std::vector<char> CharToRead;
+  std::string rule,Follow;
+  int rule_number;
+
   for(int i=0;i<states.size();i++) {
+    //
     CharToRead = getElementToRead(states.at(i));
     for(int j=0;j<CharToRead.size();j++) {
       if(Mygrammer.isTerminal(CharToRead.at(j))) {
         std::cout << states.at(i).number << " : " << CharToRead.at(j) << " -> S "<< automate.at(std::pair<int,char>(states.at(i).number,CharToRead.at(j))) << std::endl;
       }
     }
+    //
+    for(int j=0;j<states.at(i).rules.size();j++) {
+      rule = states.at(i).rules.at(j);
+      if(rule.find(".")==(rule.length()-1)) {
+        if(rule[0]=='S') {
+          std::cout << states.at(i).number << " : $ -> ACC" << std::endl;
+        }
+        else {
+          rule_number = Mygrammer.ruleNumber(rule);
+          Follow = Mygrammer.follow.at(rule[0]);
+          for(int k=0;k<Follow.length();k++) {
+            std::cout << states.at(i).number << " : " << Follow.at(k) << " -> R "<< rule_number << std::endl;
+          }
+        }
+      }
+    }
   }
 }
 int main() {
-  Mygrammer.file.open("grammar0");
+  Mygrammer.file.open("grammar");
 
   if(Mygrammer.getAxiom() == -1) {
     std::cout << "[ERROR] : unable to get axiom" << std::endl;
@@ -391,16 +504,19 @@ int main() {
     std::cout << "[ERROR] : unable to get Rules" << std::endl;
   }
   std::cout << "[INFO] : Grammar Rules" << std::endl;
-  //showRules(Mygrammer.rules);
+  showRules(Mygrammer.rules);
 
-  generateFirst(Mygrammer.axiom);
+  generateFirst('S');
   Mygrammer.showFirst();
+
+  generateFollows();
+  Mygrammer.showFollow();
 
   std::cout << "[INFO] : Adding '.' to Grammar Rules .." << std::endl;
   putDot(Mygrammer.rules);
   std::cout << "[INFO] : Grammar Rules" << std::endl;
   showRules(Mygrammer.rules);
-  /*
+
   struct state i = generateFirstState();
   processState(i,'\0',i);
   while(statesNotProcessed.size()!=0) {
@@ -410,7 +526,7 @@ int main() {
   showAutomate();
 
   generateAction();
-  */
+
 
 
 
