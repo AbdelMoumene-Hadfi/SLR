@@ -5,7 +5,9 @@
 #include <map>
 #include <utility>
 
-void processState(struct state& st,const char c,const struct state stSource);
+/*
+  Define grammar struct
+*/
 struct grammar {
   std::ifstream file;
   char axiom;
@@ -95,6 +97,16 @@ struct grammar {
     axiom = line[0];
     return 0;
   }
+  void showFirst() {
+    std::cout << "[INFO] First Table  " << std::endl;
+    for (auto it=first.begin(); it!=first.end(); ++it)
+      std::cout <<  it->first << " : " << it->second << std::endl;
+  }
+  void showFollow() {
+    std::cout << "[INFO] Follow Table  " << std::endl;
+    for (auto it=follow.begin(); it!=follow.end(); ++it)
+      std::cout <<  it->first << " : " << it->second << std::endl;
+  }
   bool isTerminal(const char element) {
     for(int i=0;i<terminal.size();i++) {
         if(terminal.at(i) == element) {
@@ -103,6 +115,9 @@ struct grammar {
     }
     return false;
   }
+  /*
+    @@ ruleNumber() : get the position of rule in my grammer.
+  */
   int ruleNumber(std::string rule) {
     std::string thisrule;
     rule.erase(rule.begin()+rule.find("."));
@@ -115,6 +130,10 @@ struct grammar {
     }
     return -1;
   }
+  /*
+    @@ getRulesStart() : get all rules of my grammar that left term equal to 'element' .
+    @@@ element : the left term .
+  */
   std::vector<std::string>  getRulesStart(const char element) {
     std::vector<std::string> rulesFrom;
     for(int i=0;i<rules.size();i++) {
@@ -124,6 +143,9 @@ struct grammar {
     }
     return rulesFrom;
   }
+  /*
+    @@ getPositionSecond() : get a vector op position of an element in right term in a specific rule .
+  */
   std::vector<int>  getPositionSecond(const std::string rule,const char element) {
     std::vector<int> Pos;
     for(int i=3;i<rule.length();i++) {
@@ -133,18 +155,13 @@ struct grammar {
     }
     return Pos;
   }
-  void showFirst() {
-    std::cout << "[INFO] First Table  " << std::endl;
-    for (auto it=first.begin(); it!=first.end(); ++it)
-      std::cout <<  it->first << " : " << it->second << std::endl;
-  }
-  void showFollow() {
-    std::cout << "[INFO] Follow Table  " << std::endl;
-    for (auto it=follow.begin(); it!=follow.end(); ++it)
-      std::cout <<  it->first << " : " << it->second << std::endl;
-  }
 }grammar;
 struct grammar Mygrammer;
+/*
+  Define state struct .
+  @@@ number : is the number of state .
+  @@@ rules : rules that i have in this state.
+*/
 struct state {
   int number;
   std::vector<std::string> rules;
@@ -153,6 +170,7 @@ std::vector<struct state> states;
 std::vector<int> statesNotProcessed;
 std::map<std::pair<int,char> ,int> automate;
 std::map<std::pair<int,char> ,std::string> action;
+
 std::string generateFirst(const char c) {
   std::map<char,std::string>::iterator retFind = Mygrammer.first.find(c);
   if(retFind != Mygrammer.first.end() ) {
@@ -257,6 +275,9 @@ void showRules(std::vector<std::string> rules) {
       std::cout << rules.at(i) << std::endl;
   }
 }
+/*
+  @@ sameState : check if the two state is the same .
+*/
 bool sameState(const struct state st,const struct state st2) {
   bool same = true;
   if(st.rules.size() != st2.rules.size()) {
@@ -272,6 +293,9 @@ bool sameState(const struct state st,const struct state st2) {
   }
   return same;
 }
+/*
+  @@ addState : add state to 'states' .
+*/
 int addState(const struct state st) {
   for(int i=0;i<states.size();i++) {
     if(sameState(st,states.at(i))) {
@@ -281,6 +305,9 @@ int addState(const struct state st) {
   states.push_back(st);
   return -1;
 }
+/*
+  @@ putDot : add Dote in the first place in second term of rules .
+*/
 void putDot(std::vector<std::string>& rules) {
   std::string rule;
   std::string dot(".");
@@ -386,6 +413,7 @@ struct state generateFirstState() {
     .rules = rules,};
   return st;
 }
+void processState(struct state& st,const char c,const struct state stSource) ;
 void gotoRules(const struct state st) {
   std::vector<char> CharToRead = getElementToRead(st);
   std::vector<std::string> rules2;
