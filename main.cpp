@@ -347,7 +347,7 @@ char getElementAfterDot(const std::string rule) {
   return rule[index+1];
 }
 /*
-  @@ getElementToRead : 
+  @@ getElementToRead : get all character after the Dot in a state .
 */
 std::vector<char> getElementToRead(const struct state st) {
   std::vector<char> ArrayElement;
@@ -372,6 +372,9 @@ std::vector<char> getElementToRead(const struct state st) {
   }
   return ArrayElement;
 }
+/*
+  @@ getrules : get all rules in a sate that have the same character after the dot .
+*/
 std::vector<std::string>  getrules(const struct state st,char element) {
   std::vector<std::string> rules;
   char afterDot;
@@ -383,6 +386,9 @@ std::vector<std::string>  getrules(const struct state st,char element) {
   }
   return rules;
 }
+/*
+  @@ ruleExist :
+*/
 bool ruleExist(const std::vector<std::string> rules,const std::string rule) {
   bool exist = false ;
   for(int i=0;i<rules.size();i++) {
