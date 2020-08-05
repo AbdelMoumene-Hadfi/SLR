@@ -387,7 +387,7 @@ std::vector<std::string>  getrules(const struct state st,char element) {
   return rules;
 }
 /*
-  @@ ruleExist :
+  @@ ruleExist : check if a rule is in vector of rules .
 */
 bool ruleExist(const std::vector<std::string> rules,const std::string rule) {
   bool exist = false ;
