@@ -316,6 +316,9 @@ void putDot(std::vector<std::string>& rules) {
     rules.at(i)=rule;
   }
 }
+/*
+  @@ moveDot : move dot 1 character to right .
+*/
 int moveDot(std::string& rule) {
   std::string rule2;
   std::string dot(".");
@@ -333,6 +336,9 @@ int moveDot(std::string& rule) {
   rule=rule2;
   return 0;
 }
+/*
+  @@ getElementAfterDot : get the character after the Dot if the Dot is in the end of rule the '\0' is returned .
+*/
 char getElementAfterDot(const std::string rule) {
   std::size_t index = rule.find('.');
   if (index==std::string::npos || index == rule.length()) {
@@ -340,6 +346,9 @@ char getElementAfterDot(const std::string rule) {
   }
   return rule[index+1];
 }
+/*
+  @@ getElementToRead : 
+*/
 std::vector<char> getElementToRead(const struct state st) {
   std::vector<char> ArrayElement;
   char afterDot;
