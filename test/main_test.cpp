@@ -17,10 +17,11 @@ TEST(ReadFile,Rules)  {
 TEST(GrammarFunction,isTerminal)  {
   EXPECT_EQ(true,Mygrammer.isTerminal('+'));
 };
+/*
 TEST(GrammarFunction,ruleNumber)  {
   EXPECT_EQ(1,Mygrammer.ruleNumber(std::string("E->E+T")));
 };
-
+*/
 int main(int argc,char**argv) {
     Mygrammer.file.open("grammar");
     testing::InitGoogleTest(&argc, argv);
