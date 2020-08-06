@@ -3,7 +3,7 @@ os: linux
 dist: bionic
 before_install:
 - rm main
-script: make
+script: make test
 after_success:
 - gcov main.cpp
 - bash <( curl -s https://codecov.io/bash )
