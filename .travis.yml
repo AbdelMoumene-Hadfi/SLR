@@ -1,6 +1,8 @@
 language: c++
 os: linux
 dist: bionic
+before_install:
+- rm main
 script: make
 after_success:
 - gcov main.cpp
