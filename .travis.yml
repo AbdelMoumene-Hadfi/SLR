@@ -3,7 +3,7 @@ os: linux
 dist: bionic
 before_install:
 - make clean
--./set_gtest.sh
+- ./set_gtest.sh
 script: make test
 after_success:
 - gcov main_test.cpp
