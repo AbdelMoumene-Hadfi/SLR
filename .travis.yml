@@ -2,11 +2,8 @@ language: c++
 os: linux
 dist: bionic
 before_install:
-- sudo apt-get install build-essential cmake
-- make clean
-- chmod +x test/SetGoogleTest.sh
-- test/SetGoogleTest.sh
+- sudo apt-get install -y googletest
 script: make test
 after_success:
-- gcov main_test.cpp
+- gcov test/main_test.cpp
 - bash <( curl -s https://codecov.io/bash )
