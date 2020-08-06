@@ -14,5 +14,7 @@ before_install:
 - sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
 script: make test
 after_success:
+- ls
+- ./main_test
 - gcov test/main_test.cpp
 - bash <( curl -s https://codecov.io/bash )
