@@ -1,0 +1,6 @@
+language: c++
+os: linux
+dist: bionic
+script: make
+after_success:
+- codecov
