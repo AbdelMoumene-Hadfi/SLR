@@ -3,7 +3,8 @@ os: linux
 dist: bionic
 before_install:
 - make clean
-- ./set_gtest.sh
+- chmod +x SetGoogleTest.sh
+- ./SetGoogleTest.sh
 script: make test
 after_success:
 - gcov main_test.cpp
