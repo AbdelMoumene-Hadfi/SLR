@@ -4,7 +4,7 @@ dist: bionic
 before_install:
 - sudo apt-get install libgtest-dev
 - sudo apt-get install cmake
-- ls /usr/src
+- pwd
 - cd /usr/src/gtest
 - sudo cmake CMakeLists.txt
 - sudo make
