@@ -2,7 +2,8 @@ language: c++
 os: linux
 dist: bionic
 before_install:
-- rm main
+- make clean
+-./set_gtest.sh
 script: make test
 after_success:
 - gcov main_test.cpp
