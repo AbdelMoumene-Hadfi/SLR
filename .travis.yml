@@ -12,6 +12,7 @@ before_install:
 - sudo mkdir /usr/local/lib/gtest
 - sudo ln -s /usr/lib/libgtest.a /usr/local/lib/gtest/libgtest.a
 - sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
+- cd /home/travis/build/AbdelMoumene-Hadfi/SLR
 script: make test
 after_success:
 - ls
