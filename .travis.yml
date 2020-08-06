@@ -4,8 +4,8 @@ dist: bionic
 before_install:
 - sudo apt-get install build-essential cmake
 - make clean
-- chmod +x SetGoogleTest.sh
-- ./SetGoogleTest.sh
+- chmod +x test/SetGoogleTest.sh
+- test/SetGoogleTest.sh
 script: make test
 after_success:
 - gcov main_test.cpp

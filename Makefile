@@ -1,6 +1,6 @@
 CC = g++
 COV = -fprofile-arcs -ftest-coverage
-
+TF = test
 .PHONY: dev test clean
 
 dev: main
@@ -10,8 +10,8 @@ main : main.cpp
 
 test: main_test
 
-main_test: main_test.cpp
-		${CC} ${COV} main_test.cpp -o ${@} -L /usr/lib -I/usr/include
+main_test: ${TF}/main_test.cpp
+		${CC} ${COV} ${TF}/main_test.cpp -o ${@} -L /usr/lib -I/usr/include
 
 clean :
 		rm -f main
