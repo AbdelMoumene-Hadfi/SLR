@@ -1,3 +1,6 @@
-sudo apt install libgtest-devcd googletest
-cd /usr/src/gtest sudo && cmake CMakeLists.txt && sudo make
-sudo cp libgtest.a libgtest_main.a /usr/lib
+sudo apt-get install cmake
+git clone https://github.com/google/googletest.git
+cd googletest-master
+sudo cmake CMakeLists.txt
+make
+sudo cp *.a /usr/lib
