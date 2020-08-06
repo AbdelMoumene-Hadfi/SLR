@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "main.cpp"
+#include "../main.cpp"
 
 TEST(ReadFile,Axiom)  {
   Mygrammer.getAxiom();
