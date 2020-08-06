@@ -7,7 +7,7 @@ TEST(ReadFile,Axiom)  {
 };
 
 TEST(ReadFile,Terminal)  {
-  Mygrammer.readTerminal()
+  Mygrammer.readTerminal();
   EXPECT_EQ("+ * ( ) e \n",Mygrammer.showTerminal());
 };
 
