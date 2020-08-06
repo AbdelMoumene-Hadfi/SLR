@@ -577,7 +577,7 @@ void showGoto() {
     std::cout << std::endl;
   }
 }
-
+/*
 int main() {
   Mygrammer.file.open("grammar");
 
@@ -627,3 +627,4 @@ int main() {
 
   showGoto();
 }
+*/
