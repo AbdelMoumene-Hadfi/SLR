@@ -2,8 +2,7 @@ language: c++
 os: linux
 dist: bionic
 before_install:
-- brew update
-- brew install cmake
+- sudo apt-get install build-essential cmake
 - make clean
 - chmod +x SetGoogleTest.sh
 - ./SetGoogleTest.sh
