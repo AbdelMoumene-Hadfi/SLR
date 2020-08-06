@@ -1,4 +1,4 @@
-# SLR (Simple LR)
+# SLR (Simple LR) [![codecov](https://codecov.io/gh/AbdelMoumene-Hadfi/SLR/branch/master/graph/badge.svg)](https://codecov.io/gh/AbdelMoumene-Hadfi/SLR/) [![Build Status](https://travis-ci.com/AbdelMoumene-Hadfi/SLR.svg?branch=master)](https://travis-ci.com/AbdelMoumene-Hadfi/SLR) 
 ## LR
 LR parsing is one type of bottom up parsing. It is constructed using an automatic parser generator .
 ## SLR
