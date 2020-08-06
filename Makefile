@@ -1,5 +1,5 @@
 CC = g++
-
+COV = -fprofile-arcs -ftest-coverage
 
 main : main.cpp
-		${CC} main.cpp -o ${@}
+		${CC} ${COV} main.cpp -o ${@}

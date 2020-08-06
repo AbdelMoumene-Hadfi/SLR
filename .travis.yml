@@ -3,4 +3,5 @@ os: linux
 dist: bionic
 script: make
 after_success:
+- gcov main.cpp
 - bash <( curl -s https://codecov.io/bash )
