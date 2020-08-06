@@ -14,9 +14,6 @@ TEST(ReadFile,noTerminal)  {
 TEST(ReadFile,Rules)  {
   EXPECT_EQ(0,Mygrammer.readRules());
 };
-TEST(ReadFile,Rules)  {
-  EXPECT_EQ(0,Mygrammer.readRules());
-};
 TEST(GrammarFunction,isTerminal)  {
   EXPECT_EQ(true,Mygrammer.isTerminal('+'));
 };
