@@ -1,5 +1,4 @@
 git clone https://github.com/google/googletest.git
-unzip googletest-master.zip
-cd googletest-master
+cd googletest
 make
 sudo cp *.a /usr/lib
