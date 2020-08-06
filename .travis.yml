@@ -5,5 +5,5 @@ before_install:
 - rm main
 script: make test
 after_success:
-- gcov main.cpp
+- gcov main_test.cpp
 - bash <( curl -s https://codecov.io/bash )
