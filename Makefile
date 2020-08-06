@@ -14,5 +14,5 @@ main_test: main_test.cpp
 		${CC} ${COV} main_test.cpp -o ${@} -L /usr/lib -I/usr/include
 
 clean :
-		rm -d main
-		rm -d main_test
+		rm -f main
+		rm -f main_test
