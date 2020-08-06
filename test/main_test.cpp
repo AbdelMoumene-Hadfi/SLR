@@ -8,7 +8,7 @@ TEST(ReadFile,Axiom)  {
 
 
 int main(int argc,char**argv) {
-    Mygrammer.file.open("grammar");
+    Mygrammer.file.open("../grammar");
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
